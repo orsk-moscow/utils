@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-arg0=$1 # prefix: `work` or `mine` or etc
+arg0=$1 # directory where text note should be placed
 
 if [ "$arg0" == '' ];
     then arg0="/Users/$(whoami)/Yandex.Disk.localized/-text-notes/"
