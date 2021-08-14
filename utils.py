@@ -2,7 +2,7 @@ from path import Path
 import logging
 from datetime import datetime
 from path import Path
-from config import BASE_FILE_FORMAT
+from .config import BASE_FILE_FORMAT
 
 
 def validate_path(path_obj, endswith):
@@ -17,18 +17,19 @@ def validate_path(path_obj, endswith):
     exit()
 
 
-def make_logging_config(debug=False):
-    logdir = Path("debug" if debug else "logs")
-    logdir.mkdir_p()
-    logfile = Path.joinpath(
-        logdir,
-        f"""{datetime.today().strftime(BASE_FILE_FORMAT)}{"-DEBUG"if debug else ""}.log""",
-    )
+def make_logging_config(debug=False, in_file=True):
+    if in_file:
+        logdir = Path("debug" if debug else "logs")
+        logdir.mkdir_p()
+        logfile = Path.joinpath(
+            logdir,
+            f"""{datetime.today().strftime(BASE_FILE_FORMAT)}{"-DEBUG"if debug else ""}.log""",
+        )
     if debug:
         logging.basicConfig(
             level=logging.DEBUG,
             format="%(asctime)s %(levelname)s %(name)s %(funcName)s: %(message)s",
-            filename=logfile,
+            filename=logfile if in_file else None,
             force=True,
         )
         logging.debug("this is test run")
@@ -36,7 +37,7 @@ def make_logging_config(debug=False):
         logging.basicConfig(
             level=logging.INFO,
             format="%(asctime)s %(levelname)s %(name)s %(funcName)s: %(message)s",
-            filename=logfile,
+            filename=logfile if in_file else None,
             force=True,
         )
         logging.info("this is production run")
