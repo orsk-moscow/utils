@@ -41,4 +41,3 @@ def make_logging_config(debug=False):
         )
         logging.info("this is production run")
     return
-
