@@ -30,7 +30,7 @@ def make_logging_config(debug=False, in_file=True):
             level=logging.DEBUG,
             format="%(asctime)s %(levelname)s %(name)s %(funcName)s: %(message)s",
             filename=logfile if in_file else None,
-            force=True,
+            force=True,  # python 3.8+ required
         )
         logging.debug("this is test run")
     else:
@@ -38,7 +38,7 @@ def make_logging_config(debug=False, in_file=True):
             level=logging.INFO,
             format="%(asctime)s %(levelname)s %(name)s %(funcName)s: %(message)s",
             filename=logfile if in_file else None,
-            force=True,
+            force=True,  # python 3.8+ required
         )
         logging.info("this is production run")
     return
