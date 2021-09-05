@@ -19,7 +19,7 @@ def validate_path(path_obj, endswith):
 
 def make_logging_config(debug=DEBUG, in_file=True):
     if in_file:
-        logdir = Path("debug" if debug else "logs")
+        logdir = Path(".debug" if debug else ".logs")
         logdir.mkdir_p()
         logfile = Path.joinpath(
             logdir,
