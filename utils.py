@@ -2,7 +2,7 @@ from path import Path
 import logging
 from datetime import datetime
 from path import Path
-from .config import BASE_FILE_FORMAT
+from .config import BASE_FILE_FORMAT, DEBUG
 
 
 def validate_path(path_obj, endswith):
@@ -17,9 +17,9 @@ def validate_path(path_obj, endswith):
     exit()
 
 
-def make_logging_config(debug=False, in_file=True):
+def make_logging_config(debug=DEBUG, in_file=True):
     if in_file:
-        logdir = Path("debug" if debug else "logs")
+        logdir = Path(".debug" if debug else ".logs")
         logdir.mkdir_p()
         logfile = Path.joinpath(
             logdir,
