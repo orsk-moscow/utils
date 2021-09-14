@@ -2,7 +2,7 @@ from path import Path
 import logging
 from datetime import datetime, timedelta
 from path import Path
-from .config import BASE_FILE_FORMAT, DEBUG, TIMESTAMP_START
+from .config import BASE_FILE_FORMAT, DEBUG, TIMESTAMP_START, STRFTIME
 
 
 def validate_path(path_obj, endswith):
@@ -46,3 +46,110 @@ def make_logging_config(debug=DEBUG, in_file=True):
 
 def calc_date(days_since_1899):
     return TIMESTAMP_START + timedelta(days_since_1899)
+
+
+def check_ts_mask(candidate, timestamp):
+    cnt = 0
+    itrtr = 0
+    while cnt < len(timestamp):
+        if itrtr >= len(candidate):
+            return False
+        if timestamp[cnt] == "%":
+            pass
+        elif timestamp[cnt] in STRFTIME.keys():
+            num_digits = STRFTIME[timestamp[cnt]] + itrtr
+            while itrtr < num_digits:
+                if candidate[itrtr] not in set("1234567890"):
+                    return False
+                itrtr += 1
+        else:
+            if timestamp[cnt] != candidate[itrtr]:
+                return False
+            itrtr += 1
+            pass
+        cnt += 1
+        continue
+    try:
+        return datetime.strptime(candidate, timestamp)
+    except:
+        pass
+    return False
+
+
+def get_ts_candidat_len(timestamp):
+    cnt = 0
+    ts_len = 0
+    while cnt < len(timestamp):
+        if timestamp[cnt] == "%":
+            if cnt + 1 >= len(timestamp):
+                raise ValueError(
+                    f"Wrong timestamp format '{timestamp}': can not correctly parse symbol at index {cnt}"
+                )
+            cnt += 1
+            sign_len = STRFTIME.get(timestamp[cnt])
+            if not sign_len:
+                raise ValueError(f"Unknown modifier '{timestamp[cnt]}'")
+            ts_len += sign_len
+        else:
+            ts_len += 1
+        cnt += 1
+    return ts_len
+
+
+def parse_timestamp(text, timestamp, index=None):
+
+    ts_len = get_ts_candidat_len(timestamp)
+    size = text.__len__()
+    cnt, current, res = 0, -1, dict()
+    if size == 0:
+        return res
+
+    while cnt < size:
+        if ts_len and cnt + ts_len > size:
+            break
+        ts = check_ts_mask(text[cnt : cnt + ts_len], timestamp)
+        if not ts:
+            cnt += 1
+            continue
+        if current != -1:
+            key_candidat = datetime.strptime(
+                text[current : current + ts_len], timestamp,
+            )
+            if index:
+                while True:
+                    if key_candidat in index:
+                        key_candidat += timedelta(seconds=1)
+                    else:
+                        index |= set([key_candidat])
+                        break
+            res[key_candidat] = text[current + ts_len : cnt]
+        current = cnt
+        cnt += 1
+        cnt += ts_len
+
+    if current == -1:
+        return res
+
+    key_candidat = datetime.strptime(text[current : current + ts_len], timestamp)
+    if index:
+        while True:
+            if key_candidat in index:
+                key_candidat += timedelta(seconds=1)
+            else:
+                index |= set([key_candidat])
+                break
+    res[key_candidat] = text[current + ts_len :]
+    return res
+
+
+def dict_union_with_ts_as_key(*dicts):
+    result_dict = dict()
+    for dict_ in dicts:
+        for k in dict_:
+            while True:
+                if k in result_dict.keys():
+                    k += timedelta(seconds=1)
+                else:
+                    break
+            result_dict[k] = dict_[k]
+    return result_dict
