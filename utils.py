@@ -2,6 +2,7 @@ from path import Path
 import logging
 from datetime import datetime, timedelta
 from path import Path
+import numpy as np
 from .config import BASE_FILE_FORMAT, DEBUG, TIMESTAMP_START, STRFTIME
 
 
@@ -45,6 +46,8 @@ def make_logging_config(debug=DEBUG, in_file=True):
 
 
 def calc_date(days_since_1899):
+    if days_since_1899 == "":
+        return np.datetime64("nat")
     return TIMESTAMP_START + timedelta(days_since_1899)
 
 
