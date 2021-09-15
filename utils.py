@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from path import Path
 import numpy as np
 from .config import BASE_FILE_FORMAT, DEBUG, TIMESTAMP_START, STRFTIME
+from typing import Any
 
 
 def validate_path(path_obj, endswith):
@@ -102,7 +103,7 @@ def get_ts_candidat_len(timestamp):
 def parse_timestamp(text, timestamp, index=None):
 
     ts_len = get_ts_candidat_len(timestamp)
-    size = text.__len__()
+    size = len(text)
     cnt, current, res = 0, -1, dict()
     if size == 0:
         return res
@@ -148,11 +149,12 @@ def parse_timestamp(text, timestamp, index=None):
 def dict_union_with_ts_as_key(*dicts):
     result_dict = dict()
     for dict_ in dicts:
-        for k in dict_:
+        for old_key in dict_:
+            new_key = old_key
             while True:
-                if k in result_dict.keys():
-                    k += timedelta(seconds=1)
+                if new_key in result_dict.keys():
+                    new_key += timedelta(seconds=1)
                 else:
                     break
-            result_dict[k] = dict_[k]
+            result_dict[new_key] = dict_[old_key]
     return result_dict
