@@ -126,6 +126,8 @@ def parse_timestamp(text, timestamp, index=None):
                     else:
                         index |= set([key_candidat])
                         break
+            else:
+                index = set([key_candidat])
             res[key_candidat] = text[current + ts_len : cnt]
         current = cnt
         cnt += 1
@@ -134,7 +136,9 @@ def parse_timestamp(text, timestamp, index=None):
     if current == -1:
         return res
 
-    key_candidat = datetime.strptime(text[current : current + ts_len], timestamp)
+    key_candidat = datetime.strptime(
+        text[current : current + ts_len], timestamp
+    )
     if index:
         while True:
             if key_candidat in index:
