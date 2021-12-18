@@ -10,11 +10,11 @@ elif [ "$arg0" == 'cotwo' ];
 elif [ "$arg0" == 'mine' ];
     then arg3='orsk-moscow'
 else 
-    echo please set correct arg0; 
+    echo "please set correct arg0: one of 'work' or 'mine' or 'cotwo'"; 
     exit 1;
 fi
 
-test "$arg1" == '' && (echo please set an arg1; exit 1)
+test "$arg1" == '' && echo "please set an arg1: key for repository, like 'FinancialRepo'" && exit 1
 
 repo='git@github.com:'$arg3'/'$arg1'.git' 
 src='/Users/'$(whoami)'/'$arg0'-'$arg1
