@@ -3,11 +3,12 @@ import logging
 from datetime import datetime, timedelta
 from path import Path
 import numpy as np
-from .config import BASE_FILE_FORMAT, DEBUG, TIMESTAMP_START, STRFTIME
+from .config import BASE_FILE_FORMAT, DEBUG, STRFTIME
 from typing import Any
+from collections import defaultdict
 
 
-def validate_path(path_obj, endswith):
+def validate_path(path_obj: Path, endswith):
     if not path_obj.exists():
         logging.error(f"""filename '{path_obj}' does not exists""")
     elif not path_obj.isfile():
@@ -44,12 +45,6 @@ def make_logging_config(debug=DEBUG, in_file=True):
         )
         logging.info("this is production run")
     return
-
-
-def calc_date(days_since_1899):
-    if days_since_1899 == "":
-        return np.datetime64("nat")
-    return TIMESTAMP_START + timedelta(days_since_1899)
 
 
 def check_ts_mask(candidate, timestamp):
@@ -136,9 +131,7 @@ def parse_timestamp(text, timestamp, index=None):
     if current == -1:
         return res
 
-    key_candidat = datetime.strptime(
-        text[current : current + ts_len], timestamp
-    )
+    key_candidat = datetime.strptime(text[current : current + ts_len], timestamp)
     if index:
         while True:
             if key_candidat in index:
@@ -162,3 +155,10 @@ def dict_union_with_ts_as_key(*dicts):
                     break
             result_dict[new_key] = dict_[old_key]
     return result_dict
+
+
+def mirror_dict(dctnr: dict) -> dict:
+    res = defaultdict(list)
+    for (k, v) in dctnr.items():
+        res[v].append(k)
+    return res
