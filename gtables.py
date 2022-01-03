@@ -42,11 +42,12 @@ class google_table:
         return self.client
 
     def get_sheet(self) -> gspread.Worksheet:
+        opened = self.client.open(self.table)
         self.sheet = (
-            self.client.open(self.table)
-            .get_worksheet(self.sheet_name if self.sheet_name else self.sheet_num)
-            .get(value_render_option=RENDER_OPTION)
-        )
+            opened.worksheet(self.sheet_name)
+            if self.sheet_name
+            else opened.get_worksheet(self.sheet_num)
+        ).get(value_render_option=RENDER_OPTION)
         return self.sheet
 
     @staticmethod
