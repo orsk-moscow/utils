@@ -103,6 +103,7 @@ class google_table:
         dataframe: DataFrame,  # TODO should I copy 'dataframe' before?
         startswith: int = 1,
         endswith: int = -1,
+        header: bool = True,
     ) -> bool:
         datetime_columns = self.dtype_columns.get("datetime")
         if not datetime_columns:
@@ -112,17 +113,27 @@ class google_table:
                 dataframe[col] = dataframe[col].apply(
                     lambda dt: google_table.get_gspread_date(dt)
                 )
-        data = list(dataframe.columns)
-        data.extend(dataframe.values.tolist())
+        data = dataframe.values.tolist()
         batch = [
             {
-                "range": f"A{startswith}:{ascii_uppercase[dataframe.shape[1]]}{endswith if endswith!=-1 else len(dataframe)+1}",
+                "range": f"A{startswith + 1 if header else startswith}:{ascii_uppercase[dataframe.shape[1]]}{endswith if endswith!=-1 else len(dataframe)+1}",
                 "values": data,
             }
         ]  # NOTE old values in this 'range' will be updated
-        self.sheet_io.batch_update(batch, value_input_option="USER_ENTERED")
-        download_success = True
-        return True if download_success else False
+        try:
+            self.sheet_io.batch_update(batch, value_input_option="USER_ENTERED")
+            download_success = True
+            logging.info(
+                f"загрузка таблицы в google tables '{self.table}/{self.sheet_name}' прошла успешно"
+            )
+        except Exception as e:
+            logging.error(
+                f"при загрузке таблицы в google tables '{self.table}/{self.sheet_name}' возникла ошибка '{e}'"
+            )
+            download_success = False
+        finally:
+            pass
+        return download_success
 
 
 def test() -> None:
