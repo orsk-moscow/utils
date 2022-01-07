@@ -74,13 +74,13 @@ class google_table:
     ) -> Union[str, int, float, datetime]:
         if goal_type == "int":
             return int(value)
-        if goal_type == "float":
+        if goal_type == "number":
             return float(value)
-        if goal_type == "datetime" and (
+        if goal_type == "date" and (
             type(value) == int or type(value) == float or value == ""
         ):
             return google_table.calc_datetime(value)
-        if goal_type == "datetime":
+        if goal_type == "date":
             return to_datetime(value)
         return value
 
@@ -105,7 +105,7 @@ class google_table:
         endswith: int = -1,
         header: bool = True,
     ) -> bool:
-        datetime_columns = self.dtype_columns.get("datetime")
+        datetime_columns = self.dtype_columns.get("date")
         if not datetime_columns:
             pass
         else:
@@ -139,13 +139,13 @@ class google_table:
 def test() -> None:
     make_logging_config(debug=True)
     column_dtypes = {
-        "Транзакция": "float",
+        "Транзакция": "number",
         "Дата": "date",
-        "Примечание": "str",
-        "Идентификатор операции": "str",
-        "Входящий баланс": "formula",
-        "Исходящий баланс": "formula",
-        "№ п.п": "formula",
+        "Примечание": "string",
+        "Идентификатор операции": "string",
+        "Входящий баланс": "string",
+        "Исходящий баланс": "string",
+        "№ п.п": "string",
     }
     google_table(
         "План-1Q22", "1Q22", "secret-gspreadsheets.json", column_dtypes
