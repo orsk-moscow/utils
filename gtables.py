@@ -9,12 +9,13 @@ from oauth2client.service_account import ServiceAccountCredentials
 from pandas import DataFrame, to_datetime
 from path import Path
 
-from utils.config import TIMESTAMP_START
+from utils.config import TIMESTAMP_START, EMPTY_VALUES
 from utils.utils import make_logging_config, mirror_dict, validate_path
 
 GOOGLE_API_SCOPE = ["https://www.googleapis.com/auth/drive"]
 ENCODING = "utf-8-sig"
 RENDER_OPTION = "FORMULA"  # "UNFORMATTED_VALUE"
+FILLNA = ""
 
 
 class google_table:
@@ -33,6 +34,8 @@ class google_table:
         self.sheet_num = None if type(sheet) == str else sheet
         self.column_dtypes = column_dtypes
         self.dtype_columns = mirror_dict(column_dtypes)
+        self._login()
+        self.get_sheet()
         pass
 
     def _login(self) -> gspread.Client:
@@ -65,7 +68,16 @@ class google_table:
 
     @staticmethod
     def get_gspread_date(timestamp: datetime) -> float:
-        days_since_1899 = (timestamp - TIMESTAMP_START) / timedelta(days=1)
+        if type(timestamp).__name__ == "datetime":
+            days_since_1899 = (timestamp - TIMESTAMP_START) / timedelta(days=1)
+        elif type(timestamp).__name__ == "date":
+            days_since_1899 = (timestamp - TIMESTAMP_START.date()) / timedelta(days=1)
+        elif type(timestamp).__name__ == "Timestamp":
+            days_since_1899 = (timestamp.to_pydatetime() - TIMESTAMP_START) / timedelta(
+                days=1
+            )
+        else:
+            days_since_1899 = (timestamp - TIMESTAMP_START) / timedelta(days=1)
         return days_since_1899
 
     @staticmethod
@@ -85,14 +97,12 @@ class google_table:
         return value
 
     def download(self) -> DataFrame:
-        self._login()
-        self.get_sheet()
         self.df_from_cloud = DataFrame(self.sheet[1:], columns=self.sheet[0])
         for col in self.df_from_cloud.columns:
             if not self.column_dtypes.get(col):
-                raise KeyError(
-                    f"В названии партии данных есть столбец '{col}', для которого не указан тип"
-                )
+                message = f"В названии партии данных есть столбец '{col}', для которого не указан тип"
+                logging.error(message)
+                raise KeyError(message)
             self.df_from_cloud[col] = self.df_from_cloud[col].apply(
                 lambda v: google_table.convert_values(v, self.column_dtypes.get(col))
             )
@@ -105,28 +115,41 @@ class google_table:
         endswith: int = -1,
         header: bool = True,
     ) -> bool:
-        datetime_columns = self.dtype_columns.get("date")
-        if not datetime_columns:
-            pass
-        else:
-            for col in datetime_columns:
-                dataframe[col] = dataframe[col].apply(
-                    lambda dt: google_table.get_gspread_date(dt)
+        for col in dataframe.columns:
+            is_datetime = False
+            while True:
+                sample = (
+                    dataframe[col].sample(1).iloc[0]
+                )  # todo потенциально слабое место, долгая итерация в случае большого числа пустых значений, нужно переделать
+                if sample in EMPTY_VALUES:
+                    continue
+                is_datetime = (
+                    True
+                    if (
+                        ("date" in type(sample).__name__.lower())
+                        or ("time" in type(sample).__name__.lower())
+                    )
+                    else False
                 )
-        data = dataframe.values.tolist()
-        batch = [
-            {
-                "range": f"A{startswith + 1 if header else startswith}:{ascii_uppercase[dataframe.shape[1]]}{endswith if endswith!=-1 else len(dataframe)+1}",
-                "values": data,
-            }
-        ]  # NOTE old values in this 'range' will be updated
+                break
+            if not is_datetime:
+                continue
+            dataframe[col] = dataframe[col].apply(
+                lambda dt: google_table.get_gspread_date(dt)
+            )
+        dataframe.fillna(FILLNA, inplace=True)
         try:
-            self.sheet_io.batch_update(batch, value_input_option="USER_ENTERED")
+            self.sheet_io.update(
+                ([dataframe.columns.values.tolist()] if header else [])
+                + dataframe.values.tolist(),
+                raw=False,
+            )
             download_success = True
             logging.info(
                 f"загрузка таблицы в google tables '{self.table}/{self.sheet_name}' прошла успешно"
             )
         except Exception as e:
+            e = str(e).replace("'", '"')
             logging.error(
                 f"при загрузке таблицы в google tables '{self.table}/{self.sheet_name}' возникла ошибка '{e}'"
             )

@@ -1,4 +1,6 @@
 from datetime import datetime
+from numpy import nan
+from pandas import NaT as nat
 
 DEBUG = False
 BASE_FILE_FORMAT = "%Y%m%d-%H%M"  # means "yyyyMMdd-HHmm", example: "20210909-0750"
@@ -15,3 +17,5 @@ STRFTIME = {
     "H": 2,
     "M": 2,
 }
+
+EMPTY_VALUES = set([nan, None, "", nat])
