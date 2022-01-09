@@ -1,14 +1,18 @@
-from path import Path
 import logging
-from datetime import datetime, timedelta
-from path import Path
-import numpy as np
-from .config import BASE_FILE_FORMAT, DEBUG, STRFTIME
-from typing import Any
 from collections import defaultdict
+from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Tuple, TypedDict
+
+import yaml
+from path import Path
+
+from .config import BASE_FILE_FORMAT, DEBUG, STRFTIME
 
 
 def validate_path(path_obj: Path, endswith):
+    logging.info(
+        f"проверка существования объекта '{path_obj}' с типом файла '{endswith}'"
+    )
     if not path_obj.exists():
         logging.error(f"""filename '{path_obj}' does not exists""")
     elif not path_obj.isfile():
@@ -162,3 +166,34 @@ def mirror_dict(dctnr: dict) -> dict:
     for (k, v) in dctnr.items():
         res[v].append(k)
     return res
+
+
+class column_dtypes_attributes(TypedDict):
+    dtype: str
+
+
+class dtype_columns_attributes(TypedDict):
+    string: Optional[List[str]]
+    number: Optional[List[str]]
+    date: Optional[List[str]]
+    time: Optional[List[str]]
+
+
+def get_sheet_info(
+    abspath: Path,
+) -> Tuple[
+    Dict[str, column_dtypes_attributes], dtype_columns_attributes, Dict[str, str]
+]:
+    validate_path(abspath)
+    with open(abspath) as f:
+        dict_dtypes = yaml.safe_load(f)
+    column_dtypes = dict([(k, dict_dtypes[k]["dtype"]) for k in dict_dtypes])
+    default_values = dict(
+        [
+            (k, dict_dtypes[k]["default"])
+            for k in dict_dtypes
+            if dict_dtypes[k]["default"]
+        ]
+    )
+    dtype_columns = mirror_dict(column_dtypes)
+    return (column_dtypes, dtype_columns, default_values)
