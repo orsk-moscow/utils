@@ -202,7 +202,7 @@ def get_sheet_info(
 def prettify_input(
     user_input: str,
     stay_whitespaces: bool = True,
-    case: Optional[Union[Literal["upper"], Literal["lower"]]] = None,
+    case: Optional[Literal["upper", "lower"]] = None,
 ) -> str:
     tokens = user_input.strip().split()
     string = (" " if stay_whitespaces else "").join(tokens)
