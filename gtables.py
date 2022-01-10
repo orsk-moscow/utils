@@ -108,6 +108,8 @@ class google_table:
                 return value
             else:
                 return to_datetime(value).to_pydatetime().time()
+        if goal_type == "bool" and (type(value) == int or type(value) == float):
+            return bool(value)
         return value
 
     def download(self) -> DataFrame:
