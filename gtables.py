@@ -55,6 +55,10 @@ class google_table:
         self.sheet = self.sheet_io.get(value_render_option=RENDER_OPTION)
         return self.sheet
 
+    def clear(self) -> None:
+        self.sheet_io.clear()
+        pass
+
     @staticmethod
     def calc_datetime(days_since_1899: Union[float, str, int]) -> datetime:
         if type(days_since_1899) == str:
