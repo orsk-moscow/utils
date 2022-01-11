@@ -121,21 +121,22 @@ class google_table:
     ) -> bool:
         for col in dataframe.columns:
             is_datetime = False
-            while True:
-                sample = (
-                    dataframe[col].sample(1).iloc[0]
-                )  # todo потенциально слабое место, долгая итерация в случае большого числа пустых значений, нужно переделать
-                if sample in EMPTY_VALUES:
-                    continue
-                is_datetime = (
-                    True
-                    if (
-                        ("date" in type(sample).__name__.lower())
-                        or ("time" in type(sample).__name__.lower())
-                    )
-                    else False
+            series = dataframe[col]
+            mask = series.notna()
+            notna = series[mask]
+            if len(notna) == 0:
+                continue
+            sample = notna.sample(1).iloc[
+                0
+            ]  # todo потенциально слабое место, долгая итерация в случае большого числа пустых значений, нужно переделать
+            is_datetime = (
+                True
+                if (
+                    ("date" in type(sample).__name__.lower())
+                    or ("time" in type(sample).__name__.lower())
                 )
-                break
+                else False
+            )
             if not is_datetime:
                 continue
             dataframe[col] = dataframe[col].apply(
