@@ -89,15 +89,27 @@ class google_table:
         value: Union[str, int, float, datetime], goal_type: str = "int"
     ) -> Union[str, int, float, datetime]:
         if goal_type == "int":
-            return int(value)
+            return int(value) if value != "" else np.nan
         if goal_type == "number":
-            return float(value)
-        if goal_type == "date" and (
+            return float(value) if value != "" else np.nan
+        if (goal_type == "date") and (
             type(value) == int or type(value) == float or value == ""
         ):
             return google_table.calc_datetime(value)
         if goal_type == "date":
             return to_datetime(value)
+        if (goal_type == "time") and (
+            type(value) == int or type(value) == float or value == ""
+        ):
+            res = google_table.calc_datetime(value)
+            return res.time()
+        if goal_type == "time":
+            if type(value).__name__ == "time":
+                return value
+            else:
+                return to_datetime(value).to_pydatetime().time()
+        if goal_type == "bool" and (type(value) == int or type(value) == float):
+            return bool(value)
         return value
 
     def download(self) -> DataFrame:

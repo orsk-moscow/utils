@@ -1,7 +1,7 @@
 import logging
 from collections import defaultdict
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple, TypedDict
+from typing import Dict, List, Literal, Optional, Tuple, TypedDict, Union
 
 import yaml
 from path import Path
@@ -184,7 +184,7 @@ def get_sheet_info(
 ) -> Tuple[
     Dict[str, column_dtypes_attributes], dtype_columns_attributes, Dict[str, str]
 ]:
-    validate_path(abspath)
+    validate_path(abspath, endswith=".yaml")
     with open(abspath) as f:
         dict_dtypes = yaml.safe_load(f)
     column_dtypes = dict([(k, dict_dtypes[k]["dtype"]) for k in dict_dtypes])
@@ -192,8 +192,24 @@ def get_sheet_info(
         [
             (k, dict_dtypes[k]["default"])
             for k in dict_dtypes
-            if dict_dtypes[k]["default"]
+            if dict_dtypes[k].get("default")
         ]
     )
     dtype_columns = mirror_dict(column_dtypes)
     return (column_dtypes, dtype_columns, default_values)
+
+
+def prettify_input(
+    user_input: str,
+    stay_whitespaces: bool = True,
+    case: Optional[Literal["upper", "lower"]] = None,
+) -> str:
+    tokens = user_input.strip().split()
+    string = (" " if stay_whitespaces else "").join(tokens)
+    if not case:
+        pass
+    elif case == "upper":
+        string = string.upper()
+    elif case == "lower":
+        string = string.lower()
+    return string
