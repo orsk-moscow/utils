@@ -75,7 +75,8 @@ class google_table:
         if type(timestamp).__name__ == "datetime":
             days_since_1899 = (timestamp - TIMESTAMP_START) / timedelta(days=1)
         elif type(timestamp).__name__ == "date":
-            days_since_1899 = (timestamp - TIMESTAMP_START.date()) / timedelta(days=1)
+            days_since_1899 = (
+                timestamp - TIMESTAMP_START.date()) / timedelta(days=1)
         elif type(timestamp).__name__ == "Timestamp":
             days_since_1899 = (timestamp.to_pydatetime() - TIMESTAMP_START) / timedelta(
                 days=1
@@ -120,7 +121,8 @@ class google_table:
                 logging.error(message)
                 raise KeyError(message)
             self.df_from_cloud[col] = self.df_from_cloud[col].apply(
-                lambda v: google_table.convert_values(v, self.column_dtypes.get(col))
+                lambda v: google_table.convert_values(
+                    v, self.column_dtypes.get(col))
             )
         return self.df_from_cloud
 
@@ -140,7 +142,7 @@ class google_table:
                 continue
             sample = notna.sample(1).iloc[
                 0
-            ]  # todo потенциально слабое место, долгая итерация в случае большого числа пустых значений, нужно переделать
+            ]
             is_datetime = (
                 True
                 if (
