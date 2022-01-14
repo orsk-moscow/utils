@@ -75,7 +75,8 @@ class google_table:
         if type(timestamp).__name__ == "datetime":
             days_since_1899 = (timestamp - TIMESTAMP_START) / timedelta(days=1)
         elif type(timestamp).__name__ == "date":
-            days_since_1899 = (timestamp - TIMESTAMP_START.date()) / timedelta(days=1)
+            days_since_1899 = (
+                timestamp - TIMESTAMP_START.date()) / timedelta(days=1)
         elif type(timestamp).__name__ == "Timestamp":
             days_since_1899 = (timestamp.to_pydatetime() - TIMESTAMP_START) / timedelta(
                 days=1
@@ -120,7 +121,8 @@ class google_table:
                 logging.error(message)
                 raise KeyError(message)
             self.df_from_cloud[col] = self.df_from_cloud[col].apply(
-                lambda v: google_table.convert_values(v, self.column_dtypes.get(col))
+                lambda v: google_table.convert_values(
+                    v, self.column_dtypes.get(col))
             )
         return self.df_from_cloud
 
@@ -133,21 +135,22 @@ class google_table:
     ) -> bool:
         for col in dataframe.columns:
             is_datetime = False
-            while True:
-                sample = (
-                    dataframe[col].sample(1).iloc[0]
-                )  # todo потенциально слабое место, долгая итерация в случае большого числа пустых значений, нужно переделать
-                if sample in EMPTY_VALUES:
-                    continue
-                is_datetime = (
-                    True
-                    if (
-                        ("date" in type(sample).__name__.lower())
-                        or ("time" in type(sample).__name__.lower())
-                    )
-                    else False
+            series = dataframe[col]
+            mask = series.notna()
+            notna = series[mask]
+            if len(notna) == 0:
+                continue
+            sample = notna.sample(1).iloc[
+                0
+            ]
+            is_datetime = (
+                True
+                if (
+                    ("date" in type(sample).__name__.lower())
+                    or ("time" in type(sample).__name__.lower())
                 )
-                break
+                else False
+            )
             if not is_datetime:
                 continue
             dataframe[col] = dataframe[col].apply(
