@@ -73,8 +73,10 @@ def check_ts_mask(candidate, timestamp):
         cnt += 1
         continue
     try:
-        return datetime.strptime(candidate, timestamp)
-    except:
+        return datetime.strptime(
+            candidate[:num_digits], timestamp
+        )  # ValueError: unconverted data remains: :29.761Z - отсекаем хвост по кол-ву нужных цифр
+    except ValueError:
         pass
     return False
 
@@ -135,7 +137,9 @@ def parse_timestamp(text, timestamp, index=None):
     if current == -1:
         return res
 
-    key_candidat = datetime.strptime(text[current : current + ts_len], timestamp)
+    key_candidat = datetime.strptime(
+        text[current : current + ts_len], timestamp
+    )
     if index:
         while True:
             if key_candidat in index:
@@ -182,7 +186,9 @@ class dtype_columns_attributes(TypedDict):
 def get_sheet_info(
     abspath: Path,
 ) -> Tuple[
-    Dict[str, column_dtypes_attributes], dtype_columns_attributes, Dict[str, str]
+    Dict[str, column_dtypes_attributes],
+    dtype_columns_attributes,
+    Dict[str, str],
 ]:
     validate_path(abspath, endswith=".yaml")
     with open(abspath) as f:
