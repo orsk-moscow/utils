@@ -65,7 +65,9 @@ class google_table:
             if days_since_1899 == "":
                 return np.datetime64("nat")
             else:
-                message = "parameter `days_since_1899` should be `float`, not `str`"
+                message = (
+                    "parameter `days_since_1899` should be `float`, not `str`"
+                )
                 logging.error(message)
                 raise ValueError(message)
         return TIMESTAMP_START + timedelta(days_since_1899)
@@ -75,12 +77,13 @@ class google_table:
         if type(timestamp).__name__ == "datetime":
             days_since_1899 = (timestamp - TIMESTAMP_START) / timedelta(days=1)
         elif type(timestamp).__name__ == "date":
-            days_since_1899 = (
-                timestamp - TIMESTAMP_START.date()) / timedelta(days=1)
-        elif type(timestamp).__name__ == "Timestamp":
-            days_since_1899 = (timestamp.to_pydatetime() - TIMESTAMP_START) / timedelta(
+            days_since_1899 = (timestamp - TIMESTAMP_START.date()) / timedelta(
                 days=1
             )
+        elif type(timestamp).__name__ == "Timestamp":
+            days_since_1899 = (
+                timestamp.to_pydatetime() - TIMESTAMP_START
+            ) / timedelta(days=1)
         else:
             days_since_1899 = (timestamp - TIMESTAMP_START) / timedelta(days=1)
         return days_since_1899
@@ -122,7 +125,8 @@ class google_table:
                 raise KeyError(message)
             self.df_from_cloud[col] = self.df_from_cloud[col].apply(
                 lambda v: google_table.convert_values(
-                    v, self.column_dtypes.get(col))
+                    v, self.column_dtypes.get(col)
+                )
             )
         return self.df_from_cloud
 
@@ -140,9 +144,7 @@ class google_table:
             notna = series[mask]
             if len(notna) == 0:
                 continue
-            sample = notna.sample(1).iloc[
-                0
-            ]
+            sample = notna.sample(1).iloc[0]
             is_datetime = (
                 True
                 if (
@@ -157,6 +159,7 @@ class google_table:
                 lambda dt: google_table.get_gspread_date(dt)
             )
         dataframe.fillna(FILLNA, inplace=True)
+        # NOTE сейчас будет выполнена выгрузка в cloud
         try:
             self.sheet_io.update(
                 ([dataframe.columns.values.tolist()] if header else [])
