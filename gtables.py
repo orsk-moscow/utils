@@ -70,7 +70,7 @@ class google_table:
                 message = (
                     "parameter `days_since_1899` should be `float`, not `str`"
                 )
-                logger.error(message)
+                log.error(message)
                 raise ValueError(message)
         return TIMESTAMP_START + timedelta(days_since_1899)
 
@@ -123,7 +123,7 @@ class google_table:
         for col in self.df_from_cloud.columns:
             if not self.column_dtypes.get(col):
                 message = f"В названии партии данных есть столбец '{col}', для которого не указан тип"
-                logger.error(message)
+                log.error(message)
                 raise KeyError(message)
             self.df_from_cloud[col] = self.df_from_cloud[col].apply(
                 lambda v: google_table.convert_values(
@@ -169,12 +169,12 @@ class google_table:
                 raw=False,
             )
             download_success = True
-            logger.info(
+            log.info(
                 f"загрузка таблицы в google tables '{self.table}/{self.sheet_name}' прошла успешно"
             )
         except Exception as e:
             e = str(e).replace("'", '"')
-            logger.error(
+            log.error(
                 f"при загрузке таблицы в google tables '{self.table}/{self.sheet_name}' возникла ошибка '{e}'"
             )
             download_success = False

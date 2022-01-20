@@ -13,17 +13,17 @@ logger = logging.getLogger(__name__)
 
 
 def validate_path(path_obj: Path, endswith: str):
-    logger.info(
+    log.info(
         f"проверка существования объекта '{path_obj}' с типом файла '{endswith}'"
     )
     if not path_obj.exists():
-        logger.error(f"""filename '{path_obj}' does not exists""")
+        log.error(f"""filename '{path_obj}' does not exists""")
     elif not path_obj.isfile():
-        logger.error(f"""filename '{path_obj}' is not a file""")
+        log.error(f"""filename '{path_obj}' is not a file""")
     elif not path_obj.endswith(endswith):
-        logger.error(f"""filename '{path_obj}' is not a '*.{endswith}' file""")
+        log.error(f"""filename '{path_obj}' is not a '*.{endswith}' file""")
     else:
-        logger.info("проверка существования объекта ОК")
+        log.info("проверка существования объекта ОК")
         return path_obj
     exit()
 
@@ -39,21 +39,21 @@ def make_logging_config(
             f"""{datetime.today().strftime(BASE_FILE_FORMAT)}{"-DEBUG"if debug else ""}.log""",
         )
     if debug:
-        logger.basicConfig(
-            level=logger.DEBUG,
+        log.basicConfig(
+            level=log.DEBUG,
             format="%(asctime)s %(levelname)s %(name)s %(funcName)s: %(message)s",
             filename=logfile if in_file else None,
             force=True,  # python 3.8+ required
         )
-        logger.debug("this is test run")
+        log.debug("this is test run")
     else:
-        logger.basicConfig(
-            level=logger.INFO,
+        log.basicConfig(
+            level=log.INFO,
             format="%(asctime)s %(levelname)s %(name)s %(funcName)s: %(message)s",
             filename=logfile if in_file else None,
             force=True,  # python 3.8+ required
         )
-        logger.info("this is production run")
+        log.info("this is production run")
     if in_file and open_for_debug and debug:
         logfile.touch()
         os.system(f"open {logfile}")
