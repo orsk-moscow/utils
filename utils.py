@@ -1,6 +1,7 @@
 import logging
 from collections import defaultdict
 from datetime import datetime, timedelta
+import os
 from typing import Dict, List, Literal, Optional, Tuple, TypedDict, Union
 
 import yaml
@@ -8,23 +9,28 @@ from path import Path
 
 from .config import BASE_FILE_FORMAT, DEBUG, STRFTIME
 
+logger = logging.getLogger(__name__)
 
-def validate_path(path_obj: Path, endswith):
-    logging.info(
+
+def validate_path(path_obj: Path, endswith: str):
+    logger.info(
         f"проверка существования объекта '{path_obj}' с типом файла '{endswith}'"
     )
     if not path_obj.exists():
-        logging.error(f"""filename '{path_obj}' does not exists""")
+        logger.error(f"""filename '{path_obj}' does not exists""")
     elif not path_obj.isfile():
-        logging.error(f"""filename '{path_obj}' is not a file""")
+        logger.error(f"""filename '{path_obj}' is not a file""")
     elif not path_obj.endswith(endswith):
-        logging.error(f"""filename '{path_obj}' is not a '*.{endswith}' file""")
+        logger.error(f"""filename '{path_obj}' is not a '*.{endswith}' file""")
     else:
+        logger.info("проверка существования объекта ОК")
         return path_obj
     exit()
 
 
-def make_logging_config(debug=DEBUG, in_file=True):
+def make_logging_config(
+    debug=DEBUG, in_file=True, open_for_debug: bool = False
+):
     if in_file:
         logdir = Path(".debug" if debug else ".logs")
         logdir.mkdir_p()
@@ -33,21 +39,24 @@ def make_logging_config(debug=DEBUG, in_file=True):
             f"""{datetime.today().strftime(BASE_FILE_FORMAT)}{"-DEBUG"if debug else ""}.log""",
         )
     if debug:
-        logging.basicConfig(
-            level=logging.DEBUG,
+        logger.basicConfig(
+            level=logger.DEBUG,
             format="%(asctime)s %(levelname)s %(name)s %(funcName)s: %(message)s",
             filename=logfile if in_file else None,
             force=True,  # python 3.8+ required
         )
-        logging.debug("this is test run")
+        logger.debug("this is test run")
     else:
-        logging.basicConfig(
-            level=logging.INFO,
+        logger.basicConfig(
+            level=logger.INFO,
             format="%(asctime)s %(levelname)s %(name)s %(funcName)s: %(message)s",
             filename=logfile if in_file else None,
             force=True,  # python 3.8+ required
         )
-        logging.info("this is production run")
+        logger.info("this is production run")
+    if in_file and open_for_debug and debug:
+        logfile.touch()
+        os.system(f"open {logfile}")
     return
 
 
