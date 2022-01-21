@@ -9,8 +9,6 @@ from path import Path
 
 from .config import BASE_FILE_FORMAT, DEBUG, STRFTIME
 
-logger = logging.getLogger(__name__)
-
 
 def validate_path(path_obj: Path, endswith: str):
     log.info(
