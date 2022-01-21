@@ -39,20 +39,22 @@ def make_logging_config(
             f"""{datetime.today().strftime(BASE_FILE_FORMAT)}{"-DEBUG"if debug else ""}.log""",
         )
     if debug:
-        log.basicConfig(
-            level=log.DEBUG,
+        logging.basicConfig(
+            level=logging.DEBUG,
             format="%(asctime)s %(levelname)s %(name)s %(funcName)s: %(message)s",
             filename=logfile if in_file else None,
             force=True,  # python 3.8+ required
         )
+        log = logging.getLogger(__name__)
         log.debug("this is test run")
     else:
-        log.basicConfig(
-            level=log.INFO,
+        logging.basicConfig(
+            level=logging.INFO,
             format="%(asctime)s %(levelname)s %(name)s %(funcName)s: %(message)s",
             filename=logfile if in_file else None,
             force=True,  # python 3.8+ required
         )
+        log = logging.getLogger(__name__)
         log.info("this is production run")
     if in_file and open_for_debug and debug:
         logfile.touch()

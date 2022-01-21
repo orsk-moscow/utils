@@ -86,6 +86,10 @@ class google_table:
             days_since_1899 = (
                 timestamp.to_pydatetime() - TIMESTAMP_START
             ) / timedelta(days=1)
+        elif type(timestamp).__name__ == "time":
+            days_since_1899 = (
+                datetime.combine(TIMESTAMP_START, timestamp) - TIMESTAMP_START
+            ) / timedelta(days=1)
         else:
             days_since_1899 = (timestamp - TIMESTAMP_START) / timedelta(days=1)
         return days_since_1899
