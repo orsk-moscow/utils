@@ -12,7 +12,7 @@ from path import Path
 from utils.config import TIMESTAMP_START, EMPTY_VALUES
 from utils.utils import make_logging_config, mirror_dict, validate_path
 
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 GOOGLE_API_SCOPE = ["https://www.googleapis.com/auth/drive"]
 ENCODING = "utf-8-sig"
