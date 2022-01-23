@@ -1,15 +1,47 @@
 import logging
+import os
 from collections import defaultdict
 from datetime import datetime, timedelta
-import os
 from typing import Dict, List, Literal, Optional, Tuple, TypedDict, Union
 
 import yaml
 from path import Path
 
-from .config import BASE_FILE_FORMAT, DEBUG, STRFTIME
+from .config import (
+    BASE_FILE_FORMAT,
+    DIR_DATA,
+    DIR_DEBUG,
+    DIR_LOGS,
+    DEBUG,
+    DISK,
+    STRFTIME,
+)
 
 log = logging.getLogger(__name__)
+
+
+def get_debug_dir() -> str:
+    """
+    return absolute path for a folder for storing debug logs inside Yandex Disk
+    it is guarantee  that folder exists
+    """
+    yadisk_abspath = get_yadisk_abspath()
+    yadisk_abspath = Path(yadisk_abspath)
+    debug_dir_abspath = yadisk_abspath.joinpath(DIR_DEBUG)
+    debug_dir_abspath.mkdir_p()
+    return str(debug_dir_abspath)
+
+
+def get_logs_dir() -> str:
+    """
+    return absolute path for a folder for storing logs inside Yandex Disk
+    it is guarantee  that folder exists
+    """
+    yadisk_abspath = get_yadisk_abspath()
+    yadisk_abspath = Path(yadisk_abspath)
+    logs_dir_abspath = yadisk_abspath.joinpath(DIR_LOGS)
+    logs_dir_abspath.mkdir_p()
+    return str(logs_dir_abspath)
 
 
 def validate_path(path_obj: Path, endswith: str):
@@ -32,8 +64,7 @@ def make_logging_config(
     debug=DEBUG, in_file=True, open_for_debug: bool = False
 ):
     if in_file:
-        logdir = Path(".debug" if debug else ".logs")
-        logdir.mkdir_p()
+        logdir = Path(get_debug_dir() if debug else get_logs_dir())
         logfile = Path.joinpath(
             logdir,
             f"""{datetime.today().strftime(BASE_FILE_FORMAT)}{"-DEBUG"if debug else ""}.log""",
@@ -230,3 +261,33 @@ def prettify_input(
     elif case == "lower":
         string = string.lower()
     return string
+
+
+def get_yadisk_abspath() -> str:
+    cd = Path(".")
+    user = cd.get_owner()
+    abspath = cd.abspath()
+    if not user in str(abspath):
+        raise RuntimeError(
+            f"""Please, run the script from a subfolder inside user's {user} HOME"""
+        )
+    home = abspath.split(user)[0]
+    home = Path(home).joinpath(user)
+    candidate = Path(home).joinpath(DISK)
+    if not candidate.isdir():
+        raise NameError(
+            f"Can not find a Yandex Disk folder's '{DISK}' in a current user's {user} dir"
+        )
+    return str(candidate)
+
+
+def get_data_dir() -> str:
+    """
+    return absolute path for a folder storing any kind of data inside Yandex Disk
+    it is guarantee  that folder exists
+    """
+    yadisk_abspath = get_yadisk_abspath()
+    yadisk_abspath = Path(yadisk_abspath)
+    data_dir_abspath = yadisk_abspath.joinpath(DIR_DATA)
+    data_dir_abspath.mkdir_p()
+    return str(data_dir_abspath)

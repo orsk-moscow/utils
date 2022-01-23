@@ -22,3 +22,9 @@ STRFTIME = {
 
 EMPTY_VALUES = set([nan, None, "", nat])
 TIMEOUT = 3.027
+DISK = (
+    "Yandex.Disk.localized"  # Variants: "Downloads" or "Yandex.Disk.localized"
+)
+DIR_DATA = "-DATA"
+DIR_DEBUG = "-DEBUG"
+DIR_LOGS = "-LOGS"
