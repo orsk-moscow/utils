@@ -1,7 +1,11 @@
-# mine ignores
+### Mine ignores
 *.csv
 *.ipynb
 .ipynb_checkpoints/*
+.vscode/*
+data*
+test*
+secret*
 
 ### OpenFrameworks+VisualStudio ###
 # ignore generated binaries
