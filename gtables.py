@@ -101,6 +101,8 @@ class google_table:
         if goal_type == "int":
             return int(value) if value != "" else np.nan
         if goal_type == "number":
+            if type(value).__name__ == "str":
+                value = value.replace(",", ".")
             return float(value) if value != "" else np.nan
         if (goal_type == "date") and (
             type(value) == int or type(value) == float or value == ""
