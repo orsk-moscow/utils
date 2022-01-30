@@ -28,3 +28,4 @@ DISK = (
 DIR_DATA = "-DATA"
 DIR_DEBUG = "-DEBUG"
 DIR_LOGS = "-LOGS"
+SEP = '\t'
