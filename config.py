@@ -29,3 +29,16 @@ DIR_DATA = "-DATA"
 DIR_DEBUG = "-DEBUG"
 DIR_LOGS = "-LOGS"
 SEP = '\t'
+
+# OPTIONS FOR PANDAS .CSV AND .TSV IO OPERATIONS
+KWARGS_CSV_INPUT = {
+    "sep": SEP,
+    "encoding": "utf-8-sig",
+    "lineterminator": '\n',
+    'dtype': 'str',
+}
+KWARGS_CSV_OUTPUT = {
+    "sep": SEP,
+    "encoding": "utf-8-sig",
+    "index": False,
+}
