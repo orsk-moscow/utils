@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 import logging
 from pathlib import Path
+
 from utils import make_logging_config
 
 log = logging.getLogger(Path(__file__).name)
