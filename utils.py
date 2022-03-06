@@ -7,7 +7,7 @@ from typing import Dict, List, Literal, Optional, Tuple, TypedDict, Union
 import yaml
 from path import Path
 
-from config import (
+from .config import (
     BASE_FILE_FORMAT,
     DIR_DATA,
     DIR_DEBUG,
