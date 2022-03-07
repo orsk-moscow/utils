@@ -5,17 +5,11 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Literal, Optional, Tuple, TypedDict, Union
 
 import yaml
+from nltk.tokenize import RegexpTokenizer
 from path import Path
 
-from .config import (
-    BASE_FILE_FORMAT,
-    DIR_DATA,
-    DIR_DEBUG,
-    DIR_LOGS,
-    DEBUG,
-    DISK,
-    STRFTIME,
-)
+from .config import (BASE_FILE_FORMAT, DEBUG, DIR_DATA, DIR_DEBUG, DIR_LOGS,
+                     DISK, STRFTIME, RE_TOKENS)
 
 log = logging.getLogger(__name__)
 
@@ -154,13 +148,13 @@ def parse_timestamp(text, timestamp, index=None):
     while cnt < size:
         if ts_len and cnt + ts_len > size:
             break
-        ts = check_ts_mask(text[cnt : cnt + ts_len], timestamp)
+        ts = check_ts_mask(text[cnt: cnt + ts_len], timestamp)
         if not ts:
             cnt += 1
             continue
         if current != -1:
             key_candidat = datetime.strptime(
-                text[current : current + ts_len], timestamp,
+                text[current: current + ts_len], timestamp,
             )
             if index:
                 while True:
@@ -171,7 +165,7 @@ def parse_timestamp(text, timestamp, index=None):
                         break
             else:
                 index = set([key_candidat])
-            res[key_candidat] = text[current + ts_len : cnt]
+            res[key_candidat] = text[current + ts_len: cnt]
         current = cnt
         cnt += 1
         cnt += ts_len
@@ -180,7 +174,7 @@ def parse_timestamp(text, timestamp, index=None):
         return res
 
     key_candidat = datetime.strptime(
-        text[current : current + ts_len], timestamp
+        text[current: current + ts_len], timestamp
     )
     if index:
         while True:
@@ -189,7 +183,7 @@ def parse_timestamp(text, timestamp, index=None):
             else:
                 index |= set([key_candidat])
                 break
-    res[key_candidat] = text[current + ts_len :]
+    res[key_candidat] = text[current + ts_len:]
     return res
 
 
@@ -295,3 +289,9 @@ def get_data_dir() -> str:
     data_dir_abspath = yadisk_abspath.joinpath(DIR_DATA)
     data_dir_abspath.mkdir_p()
     return str(data_dir_abspath)
+
+
+WhtspsTokenizer = RegexpTokenizer(
+    pattern=RE_TOKENS, gaps=True, discard_empty=False
+)
+TokensTokenizer = RegexpTokenizer(pattern=RE_TOKENS, gaps=False)

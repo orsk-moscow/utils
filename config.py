@@ -1,16 +1,23 @@
+import locale
 from datetime import datetime
+
 from numpy import nan
 from pandas import NaT as nat
 
+LOCALE = 'ru_RU.UTF-8'
+locale.setlocale(locale.LC_TIME, LOCALE)
 DEBUG = False
 BASE_FILE_FORMAT = (
     "%Y%m%d-%H%M-"  # means "yyyyMMdd-HHmm-", example: "20210909-0750-"
 )
 BASE_FORMAT_DATE = "%Y%m%d"
 BASE_FORMAT_TIME = "%H%M"
+FORMAT_DATE_FOR_READING = "%d %B %Y (%A)"
+
 DATETIME_PREFIX = datetime.now().strftime(BASE_FILE_FORMAT)
 SEED = 42
 LINKS_RE = "https?:\S+|http?:\S+"
+RE_TOKENS = r"\w+|[^\w\s]+"
 TIMESTAMP_START = datetime(1899, 12, 30)
 STRFTIME = {
     "d": 2,
