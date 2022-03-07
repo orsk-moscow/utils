@@ -207,10 +207,14 @@ def dict_union_with_ts_as_key(*dicts):
     return result_dict
 
 
-def mirror_dict(dctnr: dict) -> dict:
+def mirror_dict(dctnr: Dict[Union[datetime, int, str], Union[datetime, int, str]]) -> Dict[Union[datetime, int, str], List]:
     res = defaultdict(list)
     for (k, v) in dctnr.items():
-        res[v].append(k)
+        if type(v).__name__ != 'list':
+            res[v].append(k)
+        else:
+            for e in v:
+                res[e].append(k)
     return res
 
 
