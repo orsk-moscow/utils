@@ -38,19 +38,22 @@ def get_logs_dir() -> str:
     return str(logs_dir_abspath)
 
 
-def validate_path(path_obj: Path, endswith: str):
+def validate_path(path_obj: Path, endswith: str, gracefull: bool = False):
     log.info(
         f"проверка существования объекта '{path_obj}' с типом файла '{endswith}'"
     )
     if not path_obj.exists():
-        log.error(f"""filename '{path_obj}' does not exists""")
+        log.warning(f"""filename '{path_obj}' does not exists""")
     elif not path_obj.isfile():
-        log.error(f"""filename '{path_obj}' is not a file""")
+        log.warning(f"""filename '{path_obj}' is not a file""")
     elif not path_obj.endswith(endswith):
-        log.error(f"""filename '{path_obj}' is not a '*.{endswith}' file""")
+        log.warning(f"""filename '{path_obj}' is not a '{endswith}' file""")
     else:
         log.info("проверка существования объекта ОК")
-        return path_obj
+        return True
+    if gracefull:
+        return False
+    log.error(f"validity check of '{path_obj}' failed, exit")
     exit()
 
 
