@@ -3,14 +3,12 @@
 arg0=$1 # prefix: `work` or `mine` or etc
 arg1=$2 # key for repository, for example: `zvq-etl`
 
-if [ "$arg0" == 'work' ];
-    then arg3='zvuk'
-elif [ "$arg0" == 'cotwo' ];
+if [ "$arg0" == 'cotwo' ];
     then arg3='cotwo-project'
 elif [ "$arg0" == 'mine' ];
     then arg3='orsk-moscow'
 else 
-    echo "please set correct arg0: one of 'work' or 'mine' or 'cotwo'"; 
+    echo "please set correct arg0: one of 'mine' or 'cotwo'"; 
     exit 1;
 fi
 
@@ -21,4 +19,3 @@ src='/Users/'$(whoami)'/'$arg0'-'$arg1
 dest='/Users/'$(whoami)'/'$arg0'-'$arg1'.lnk'
 
 git clone $repo $src
-ln -s $src $dest
