@@ -9,7 +9,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 from pandas import DataFrame, to_datetime
 from path import Path
 
-from utils.config import TIMESTAMP_START, EMPTY_VALUES
+from utils.config import TIMESTAMP_START
 from utils.utils import make_logging_config, mirror_dict, validate_path
 
 log = logging.getLogger(__name__)
@@ -124,8 +124,9 @@ class google_table:
             return bool(value)
         return value
 
-    def download(self) -> DataFrame:
-        self.df_from_cloud = DataFrame(self.sheet[1:], columns=self.sheet[0])
+    def download(self, header_line=0) -> DataFrame:
+        self.df_from_cloud = DataFrame(
+            self.sheet[header_line+1:], columns=self.sheet[header_line])
         for col in self.df_from_cloud.columns:
             if not self.column_dtypes.get(col):
                 message = f"В названии партии данных есть столбец '{col}', для которого не указан тип"
@@ -170,6 +171,7 @@ class google_table:
         # NOTE сейчас будет выполнена выгрузка в cloud
         try:
             self.sheet_io.update(
+                f"A{startswith}:{ascii_uppercase[dataframe.shape[1]]}{dataframe.shape[0]+startswith if endswith==-1 else endswith}",
                 ([dataframe.columns.values.tolist()] if header else [])
                 + dataframe.values.tolist(),
                 raw=False,
