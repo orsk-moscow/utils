@@ -7,7 +7,7 @@ import gspread
 import numpy as np
 from oauth2client.service_account import ServiceAccountCredentials
 from pandas import DataFrame, to_datetime
-from path import Path
+from pathlib import Path
 
 from utils.config import TIMESTAMP_START
 from utils.utils import make_logging_config, mirror_dict, validate_path
@@ -29,7 +29,7 @@ class google_table:
         column_dtypes: Mapping[str, type],
     ) -> None:
         self.table = table
-        validate_path(Path(secret_json).abspath(), endswith=".json")
+        validate_path(secret_json.absolute(), endswith=".json")
         self.secret_json = secret_json
         self.scopes = GOOGLE_API_SCOPE
         self.sheet_name = None if type(sheet) == int else sheet

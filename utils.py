@@ -6,7 +6,7 @@ from typing import Dict, List, Literal, Optional, Tuple, TypedDict, Union
 
 import yaml
 from nltk.tokenize import RegexpTokenizer
-from path import Path
+from pathlib import Path
 
 from .config import (BASE_FILE_FORMAT, DEBUG, DIR_DATA, DIR_DEBUG, DIR_LOGS,
                      DISK, STRFTIME, RE_TOKENS)
@@ -22,7 +22,7 @@ def get_debug_dir() -> str:
     yadisk_abspath = get_yadisk_abspath()
     yadisk_abspath = Path(yadisk_abspath)
     debug_dir_abspath = yadisk_abspath.joinpath(DIR_DEBUG)
-    debug_dir_abspath.mkdir_p()
+    debug_dir_abspath.mkdir(exist_ok=True)
     return str(debug_dir_abspath)
 
 
@@ -44,9 +44,9 @@ def validate_path(path_obj: Path, endswith: str, gracefull: bool = False):
     )
     if not path_obj.exists():
         log.warning(f"""filename '{path_obj}' does not exists""")
-    elif not path_obj.isfile():
+    elif not path_obj.is_file():
         log.warning(f"""filename '{path_obj}' is not a file""")
-    elif not path_obj.endswith(endswith):
+    elif not path_obj.name.endswith(endswith):
         log.warning(f"""filename '{path_obj}' is not a '{endswith}' file""")
     else:
         log.info("проверка существования объекта ОК")
@@ -265,19 +265,11 @@ def prettify_input(
 
 
 def get_yadisk_abspath() -> str:
-    cd = Path(".")
-    user = cd.get_owner()
-    abspath = cd.abspath()
-    if not user in str(abspath):
-        raise RuntimeError(
-            f"""Please, run the script from a subfolder inside user's {user} HOME"""
-        )
-    home = abspath.split(user)[0]
-    home = Path(home).joinpath(user)
-    candidate = Path(home).joinpath(DISK)
-    if not candidate.isdir():
+    home = Path(__file__).home()
+    candidate = home.joinpath(DISK)
+    if not candidate.is_dir():
         raise NameError(
-            f"Can not find a Yandex Disk folder's '{DISK}' in a current user's {user} dir"
+            f"Can not find a Yandex Disk folder's '{DISK}' in a current home '{home}' dir"
         )
     return str(candidate)
 
@@ -290,7 +282,7 @@ def get_data_dir() -> str:
     yadisk_abspath = get_yadisk_abspath()
     yadisk_abspath = Path(yadisk_abspath)
     data_dir_abspath = yadisk_abspath.joinpath(DIR_DATA)
-    data_dir_abspath.mkdir_p()
+    data_dir_abspath.mkdir(exist_ok=True)
     return str(data_dir_abspath)
 
 
@@ -298,3 +290,9 @@ WhtspsTokenizer = RegexpTokenizer(
     pattern=RE_TOKENS, gaps=True, discard_empty=False
 )
 TokensTokenizer = RegexpTokenizer(pattern=RE_TOKENS, gaps=False)
+
+
+def log_params(params: list) -> None:
+    usefull_keys = [k for k in params if k != 'params']
+    for k in usefull_keys:
+        log.info(f"переданный параметр '{k}' = '{params[k]}'")
