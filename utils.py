@@ -2,14 +2,14 @@ import logging
 import os
 from collections import defaultdict
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Dict, List, Literal, Optional, Tuple, TypedDict, Union
 
 import yaml
 from nltk.tokenize import RegexpTokenizer
-from pathlib import Path
 
-from .config import (BASE_FILE_FORMAT, DEBUG, DIR_DATA, DIR_DEBUG, DIR_LOGS,
-                     DISK, STRFTIME, RE_TOKENS)
+from config import (BASE_FILE_FORMAT, DEBUG, DIR_DATA, DIR_DEBUG, DIR_LOGS,
+                    DISK, RE_TOKENS, STRFTIME)
 
 log = logging.getLogger(__name__)
 
