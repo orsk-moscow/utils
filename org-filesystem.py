@@ -2,6 +2,7 @@
 import logging
 from pathlib import Path
 
+from config import DISK
 from utils import make_logging_config
 
 log = logging.getLogger(Path(__file__).name)
@@ -12,7 +13,6 @@ DIR_WHITELIST = [
     'Desktop',
 ]
 DIR_DEST = 'Pictures'
-YADISK = 'Yandex.Disk.localized'
 YAFOLDER = 'Downloads'
 MEDIA = {
     'png',
@@ -25,13 +25,13 @@ MEDIA = {
     'mpeg4',
     'hevc',
 }
-
+NEEDED = {'input.txt', 'output.txt'}
 if __name__ == '__main__':
     make_logging_config(debug=DEBUG)
     current = Path(__file__)
     home = current.home()
     dest = home.joinpath(DIR_DEST)
-    yandex = home.joinpath(YADISK).joinpath(YAFOLDER)
+    yandex = home.joinpath(DISK).joinpath(YAFOLDER)
     media = set([f".{str(e).lower().replace('.','')}" for e in MEDIA])
 
     for e in DIR_WHITELIST:
@@ -51,6 +51,9 @@ if __name__ == '__main__':
         if e.name.startswith("."):
             continue
         if e.name.startswith("file."):
+            log.info(f"файл '{e}' пропущен: служебный")
+            continue
+        if e.name in NEEDED:
             log.info(f"файл '{e}' пропущен: служебный")
             continue
         if e.is_file():
