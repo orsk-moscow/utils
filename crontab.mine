@@ -1,1 +1,2 @@
 */1 9-22 * * * /Users/popov-iv/opt/anaconda3/bin/python3 '/Users/popov-iv/Yandex.Disk.localized/computer-sciense/pet-text-flow/parafrazes/main.py'
+0 23 * * * /Users/popov-iv/opt/anaconda3/bin/python3 '/Users/popov-iv/Yandex.Disk.localized/computer-sciense/pet-text-flow/parafrazes/utils/org-filesystem.py'
