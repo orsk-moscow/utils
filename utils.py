@@ -8,8 +8,8 @@ from typing import Dict, List, Literal, Optional, Tuple, TypedDict, Union
 import yaml
 from nltk.tokenize import RegexpTokenizer
 
-from config import (BASE_FILE_FORMAT, DEBUG, DIR_DATA, DIR_DEBUG, DIR_LOGS,
-                    DISK, RE_TOKENS, STRFTIME)
+from utils.config import (BASE_FILE_FORMAT, DEBUG, DIR_DATA, DIR_DEBUG, DIR_LOGS,
+                          DISK, RE_TOKENS, STRFTIME)
 
 log = logging.getLogger(__name__)
 
