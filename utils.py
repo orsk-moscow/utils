@@ -77,6 +77,7 @@ def make_logging_config(
         force=True,  # python 3.8+ required
     )
     log = logging.getLogger(__name__)
+    log.info("start")
     log.debug("this is test run") if debug else log.info(
         "this is production run")
     if in_file and open_for_debug and debug:
