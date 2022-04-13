@@ -8,8 +8,9 @@ from typing import Dict, List, Literal, Optional, Tuple, TypedDict, Union
 import yaml
 from nltk.tokenize import RegexpTokenizer
 
-from utils.config import (BASE_FILE_FORMAT, DEBUG, DIR_DATA, DIR_DEBUG, DIR_LOGS,
-                          DISK, RE_TOKENS, STRFTIME)
+from utils.config import (DATETIME_PREFIX, DEBUG, DIR_DATA, DIR_DEBUG,
+                          DIR_LOGS, DISK, LOG_FORMAT, NAME_NODE, RE_TOKENS,
+                          STRFTIME)
 
 log = logging.getLogger(__name__)
 
@@ -60,30 +61,24 @@ def validate_path(path_obj: Path, endswith: str, gracefull: bool = False):
 def make_logging_config(
     debug=DEBUG, in_file=True, open_for_debug: bool = False
 ):
+    """
+    1) устанавливает единый формат записи журнала
+    2) перенапраялвет потоки в файл
+    """
+    # TODO работает долго и нуждается в профилировании: вызов делается 1.22 сек на личном макбуке
     if in_file:
+        filename = f'{DATETIME_PREFIX}-{NAME_NODE}{"-DEBUG"if debug else ""}.log'
         logdir = Path(get_debug_dir() if debug else get_logs_dir())
-        logfile = Path.joinpath(
-            logdir,
-            f"""{datetime.today().strftime(BASE_FILE_FORMAT)}{"-DEBUG"if debug else ""}.log""",
-        )
-    if debug:
-        logging.basicConfig(
-            level=logging.DEBUG,
-            format="%(asctime)s %(levelname)s %(name)s %(funcName)s: %(message)s",
-            filename=logfile if in_file else None,
-            force=True,  # python 3.8+ required
-        )
-        log = logging.getLogger(__name__)
-        log.debug("this is test run")
-    else:
-        logging.basicConfig(
-            level=logging.INFO,
-            format="%(asctime)s %(levelname)s %(name)s %(funcName)s: %(message)s",
-            filename=logfile if in_file else None,
-            force=True,  # python 3.8+ required
-        )
-        log = logging.getLogger(__name__)
-        log.info("this is production run")
+        logfile = Path.joinpath(logdir, filename)
+    logging.basicConfig(
+        level=logging.DEBUG if debug else logging.INFO,
+        format=LOG_FORMAT,
+        filename=logfile if in_file else None,
+        force=True,  # python 3.8+ required
+    )
+    log = logging.getLogger(__name__)
+    log.debug("this is test run") if debug else log.info(
+        "this is production run")
     if in_file and open_for_debug and debug:
         logfile.touch()
         os.system(f"open {logfile}")
