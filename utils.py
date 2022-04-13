@@ -67,7 +67,7 @@ def make_logging_config(
     """
     # TODO работает долго и нуждается в профилировании: вызов делается 1.22 сек на личном макбуке
     if in_file:
-        filename = f'{DATETIME_PREFIX}-{NAME_NODE}{"-DEBUG"if debug else ""}.log'
+        filename = f'{DATETIME_PREFIX}{NAME_NODE}{"-DEBUG"if debug else ""}.log'
         logdir = Path(get_debug_dir() if debug else get_logs_dir())
         logfile = Path.joinpath(logdir, filename)
     logging.basicConfig(
