@@ -8,9 +8,20 @@ from typing import Dict, List, Literal, Optional, Tuple, TypedDict, Union
 import yaml
 from nltk.tokenize import RegexpTokenizer
 
-from utils.config import (DATETIME_PREFIX, DEBUG, DIR_DATA, DIR_DEBUG,
-                          DIR_LOGS, DISK, LOG_FORMAT, NAME_NODE, RE_TOKENS,
-                          STRFTIME)
+from utils.config import (
+    DATETIME_PREFIX,
+    DEBUG,
+    DIR_DATA,
+    DIR_DEBUG,
+    DIR_LOGS,
+    DISK,
+    LOG_FORMAT,
+    NAME_NODE,
+    RE_NEWLINES,
+    RE_TOKENS,
+    STRFTIME,
+    STRFTIME_LOCAL,
+)
 
 log = logging.getLogger(__name__)
 
@@ -79,7 +90,8 @@ def make_logging_config(
     log = logging.getLogger(__name__)
     log.info("start")
     log.debug("this is test run") if debug else log.info(
-        "this is production run")
+        "this is production run"
+    )
     if in_file and open_for_debug and debug:
         logfile.touch()
         os.system(f"open {logfile}")
@@ -89,6 +101,7 @@ def make_logging_config(
 def check_ts_mask(candidate, timestamp):
     cnt = 0
     itrtr = 0
+    # NOTE Интересно посмотреть на обработку цикла для кириллического timestamp
     while cnt < len(timestamp):
         if itrtr >= len(candidate):
             return False
@@ -100,6 +113,18 @@ def check_ts_mask(candidate, timestamp):
                 if candidate[itrtr] not in set("1234567890"):
                     return False
                 itrtr += 1
+        elif timestamp[cnt] in STRFTIME_LOCAL.keys():
+            length = STRFTIME_LOCAL[timestamp[cnt]]["num"]
+            values = STRFTIME_LOCAL[timestamp[cnt]]["values"]
+            if candidate[itrtr : itrtr + length] in values:
+                itrtr += length
+                # NOTE Работает ли .isalpha() для Кириллиц?
+                while candidate[itrtr].isalpha():
+                    if itrtr >= len(candidate):
+                        return False
+                    itrtr += 1
+            else:
+                return False
         else:
             if timestamp[cnt] != candidate[itrtr]:
                 return False
@@ -147,13 +172,14 @@ def parse_timestamp(text, timestamp, index=None):
     while cnt < size:
         if ts_len and cnt + ts_len > size:
             break
-        ts = check_ts_mask(text[cnt: cnt + ts_len], timestamp)
+        ts = check_ts_mask(text[cnt : cnt + ts_len], timestamp)
         if not ts:
             cnt += 1
             continue
         if current != -1:
             key_candidat = datetime.strptime(
-                text[current: current + ts_len], timestamp,
+                text[current : current + ts_len],
+                timestamp,
             )
             if index:
                 while True:
@@ -164,7 +190,7 @@ def parse_timestamp(text, timestamp, index=None):
                         break
             else:
                 index = set([key_candidat])
-            res[key_candidat] = text[current + ts_len: cnt]
+            res[key_candidat] = text[current + ts_len : cnt]
         current = cnt
         cnt += 1
         cnt += ts_len
@@ -173,7 +199,7 @@ def parse_timestamp(text, timestamp, index=None):
         return res
 
     key_candidat = datetime.strptime(
-        text[current: current + ts_len], timestamp
+        text[current : current + ts_len], timestamp
     )
     if index:
         while True:
@@ -182,7 +208,7 @@ def parse_timestamp(text, timestamp, index=None):
             else:
                 index |= set([key_candidat])
                 break
-    res[key_candidat] = text[current + ts_len:]
+    res[key_candidat] = text[current + ts_len :]
     return res
 
 
@@ -200,10 +226,12 @@ def dict_union_with_ts_as_key(*dicts):
     return result_dict
 
 
-def mirror_dict(dctnr: Dict[Union[datetime, int, str], Union[datetime, int, str]]) -> Dict[Union[datetime, int, str], List]:
+def mirror_dict(
+    dctnr: Dict[Union[datetime, int, str], Union[datetime, int, str]]
+) -> Dict[Union[datetime, int, str], List]:
     res = defaultdict(list)
     for (k, v) in dctnr.items():
-        if type(v).__name__ != 'list':
+        if type(v).__name__ != "list":
             res[v].append(k)
         else:
             for e in v:
@@ -282,13 +310,18 @@ def get_data_dir() -> str:
     return str(data_dir_abspath)
 
 
-WhtspsTokenizer = RegexpTokenizer(
+tokenizerWhtsps = RegexpTokenizer(
     pattern=RE_TOKENS, gaps=True, discard_empty=False
 )
-TokensTokenizer = RegexpTokenizer(pattern=RE_TOKENS, gaps=False)
+tokenizerTokens = RegexpTokenizer(pattern=RE_TOKENS, gaps=False)
+
+tokenizerWhtspsNewline = RegexpTokenizer(
+    pattern=RE_NEWLINES, gaps=True, discard_empty=False
+)
+tokenizerTokenNewline = RegexpTokenizer(pattern=RE_NEWLINES, gaps=False)
 
 
 def log_params(params: list) -> None:
-    usefull_keys = [k for k in params if k != 'params']
+    usefull_keys = [k for k in params if k != "params"]
     for k in usefull_keys:
         log.info(f"переданный параметр '{k}' = '{params[k]}'")
