@@ -36,7 +36,7 @@ WEEK_DAYS_RU = {
     "четве",
     "пятни",
     "суббо",
-    "воскре",
+    "воскр",
 }
 MONTHS_RU = {
     "янв",
@@ -110,7 +110,7 @@ LOG_FORMAT = (
 # NOTE usefull regular expressions patterns
 RE_LINKS = r"https?:\S+|http?:\S+"
 RE_TOKENS = r"\w+|[^\w\s]+"
-RE_NEWLINES = r"\n+"
+RE_NEWLINES = r"[^\n]+"
 
 # NOTE text processing info
 SEP = "\t"
@@ -127,10 +127,7 @@ PRE_PATTERNS = [
 ]
 NOISE_PATTERNS = [
     (re.compile(f"{SEP}"), ". "),  # delete rubbish separators
-    (
-        re.compile('"'),
-        " ",
-    ),
+    (re.compile('"'), " ",),
     (re.compile(r"\s+\n"), "\n"),  # delete empty lines and new lines
     (r"(?:\.+)\n+", END_OF_LINE),
 ]

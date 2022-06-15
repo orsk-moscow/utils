@@ -134,8 +134,8 @@ def check_ts_mask(candidate, timestamp):
         continue
     try:
         return datetime.strptime(
-            candidate[:num_digits], timestamp
-        )  # ValueError: unconverted data remains: :29.761Z - отсекаем хвост по кол-ву нужных цифр
+            candidate, timestamp
+        )  # without [:num_digits] may cause ValueError: unconverted data remains: :29.761Z - отсекаем хвост по кол-ву нужных цифр
     except ValueError:
         pass
     return False
@@ -178,8 +178,7 @@ def parse_timestamp(text, timestamp, index=None):
             continue
         if current != -1:
             key_candidat = datetime.strptime(
-                text[current : current + ts_len],
-                timestamp,
+                text[current : current + ts_len], timestamp,
             )
             if index:
                 while True:
@@ -318,7 +317,7 @@ tokenizerTokens = RegexpTokenizer(pattern=RE_TOKENS, gaps=False)
 tokenizerWhtspsNewline = RegexpTokenizer(
     pattern=RE_NEWLINES, gaps=True, discard_empty=False
 )
-tokenizerTokenNewline = RegexpTokenizer(pattern=RE_NEWLINES, gaps=False)
+tokenizerTokensNewline = RegexpTokenizer(pattern=RE_NEWLINES, gaps=False)
 
 
 def log_params(params: list) -> None:
